@@ -130,7 +130,7 @@ async function test_rbql_node(test_folder_uri) {
     active_doc = vscode.window.activeTextEditor.document;
     let length_after_query = active_doc.getText().length;
     log_message(`Length after python query: ${length_after_query}`);
-    assert.equal(868, length_after_query); // wc -c gives smaller value. Probably VSCode uses '\r\n' as line ends.
+    assert(length_after_query == 868 || length_after_query == 847 /* + 20 lines + 1 header line = 868 chars*/); // wc -c gives smaller value. Probably VSCode uses '\r\n' as line ends.
 
     // Test JS query.
     test_task = {rbql_backend: "js", with_headers: false, rbql_query: "select a2 * 10, a3, a3.length where NR > 1 order by a3.length limit 10"};
@@ -189,7 +189,7 @@ async function test_rbql_node(test_folder_uri) {
     length_after_query = active_doc.getText().length;
     log_message(`Length after join query: ${length_after_query}`);
     // Not sure why it is 11592 and not 11610, when saving the file `wc -c` gives 11610.
-    assert.equal(11592, length_after_query);
+    assert(length_after_query == 11592 || length_after_query == 11391 /* + 200 lines + 1 header line = 11592 chars*/);
     // We have 202 not 201 because the trailing '\n' maps to a trailing empty line in VSCode.
     assert.equal(202, active_doc.lineCount);
 
@@ -211,9 +211,10 @@ async function test_rbql_node(test_folder_uri) {
     active_doc = vscode.window.activeTextEditor.document;
     let filename_after = active_doc.fileName;
     length_after_query = active_doc.getText().length;
+    log_message(`Length before update query: ${length_before_query}`);
     log_message(`Length after update query: ${length_after_query}`);
     // Changing column to lowercase should not affect the doc length if we account for the '\r\n' line endings.
-    assert.equal(length_before_query, length_after_query - active_doc.lineCount + 1);
+    assert((length_before_query == length_after_query - active_doc.lineCount + 1) || length_before_query == length_after_query);
     assert(active_doc.getText().indexOf('OCEANIA') == -1);
     assert(active_doc.getText().indexOf('oceania') > 0);
 
